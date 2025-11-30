@@ -14,6 +14,7 @@ export class StudentSignupComponent {
   email: any;
   fullName: any;
   onSignup() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/admin/dashboard']);
   }
+
 }

@@ -54,8 +54,6 @@ export class AdminSignupComponent {
       this.signupForm.get(key)?.markAsTouched();
     });
   }
-
-  // Getters
   get firstName() {
     return this.signupForm.get('firstName');
   }

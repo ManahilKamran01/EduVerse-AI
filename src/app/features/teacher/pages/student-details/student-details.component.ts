@@ -13,9 +13,8 @@ import { DataTableComponent, TableColumn } from '../../../../shared/components/d
 })
 export class StudentDetailsComponent implements OnInit {
   studentId: number | null = null;
-  student: any;
+  student: any = null;
 
-  // Columns for tables
   quizColumns: TableColumn[] = [
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'scoreDisplay', label: 'Score', type: 'text' },
@@ -33,8 +32,12 @@ export class StudentDetailsComponent implements OnInit {
     this.loadStudentData();
   }
 
+  goBack() {
+    this.router.navigate(['/teacher/trackstudent']);
+  }
+
   loadStudentData() {
-    const allStudents = [
+    const allStudents: any[] = [
       {
         id: 1,
         name: 'John Doe',
@@ -92,22 +95,54 @@ export class StudentDetailsComponent implements OnInit {
     const selected = allStudents.find((s) => s.id === this.studentId);
 
     if (selected) {
-      // Add scoreDisplay for each quiz/assignment
-      selected.quizzes = selected.quizzes.map((q) => ({
+      // Add scoreDisplay
+      selected.quizzes = selected.quizzes.map((q: any) => ({
         ...q,
         scoreDisplay: `${q.score}/${q.total}`,
       }));
-      selected.assignments = selected.assignments.map((a) => ({
+      selected.assignments = selected.assignments.map((a: any) => ({
         ...a,
         scoreDisplay: `${a.score}/${a.total}`,
       }));
+
+      const totalQuizScore = selected.quizzes.reduce((sum: number, q: any) => sum + q.score, 0);
+      const totalQuizMax = selected.quizzes.reduce((sum: number, q: any) => sum + q.total, 0);
+
+      const totalAssignmentScore = selected.assignments.reduce(
+        (sum: number, a: any) => sum + a.score,
+        0
+      );
+      const totalAssignmentMax = selected.assignments.reduce(
+        (sum: number, a: any) => sum + a.total,
+        0
+      );
+
+      selected.quizzes.push({
+        title: 'Total',
+        scoreDisplay: `${totalQuizScore}/${totalQuizMax}`,
+      });
+      selected.assignments.push({
+        title: 'Total',
+        scoreDisplay: `${totalAssignmentScore}/${totalAssignmentMax}`,
+      });
+
+      (selected as any).quizPercentage = totalQuizMax
+        ? Math.round((totalQuizScore / totalQuizMax) * 100)
+        : 0;
+      (selected as any).assignmentPercentage = totalAssignmentMax
+        ? Math.round((totalAssignmentScore / totalAssignmentMax) * 100)
+        : 0;
+      const overallScore = totalQuizScore + totalAssignmentScore;
+      const overallMax = totalQuizMax + totalAssignmentMax;
+      (selected as any).percentage = overallMax ? Math.round((overallScore / overallMax) * 100) : 0;
     }
 
     this.student = selected;
   }
 
-  // Navigate back to Track Student page
- goBack() {
-  this.router.navigate(['/teacher/trackstudent']); 
-}
+  getProgressColor(value: number) {
+    if (value >= 80) return 'bg-green-500';
+    if (value >= 50) return 'bg-yellow-400';
+    return 'bg-red-500';
+  }
 }

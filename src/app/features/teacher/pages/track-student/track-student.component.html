@@ -4,18 +4,18 @@
     pageTitle="Student Tracking"
   ></app-header>
 
-  <div class="p-6 space-y-6">
-    <!-- Filters -->
-    <app-filters
-      [dropdowns]="dropdowns"
-      [searchPlaceholder]="'Search students...'"
-      (filtersChange)="onFiltersChange($event)"
-    ></app-filters>
-
- 
-
-    <!-- Data Table with Progress Bar -->
+  <main class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <app-filters
+        class="flex-grow mr-4"
+        [dropdowns]="dropdowns"
+        [searchPlaceholder]="'Search students...'"
+        (filtersChange)="onFiltersChange($event)"
+      ></app-filters>
+    
+    </div>
     <app-data-table
+      class="mt-3"
       [title]="'Students'"
       [columns]="columns"
       [rows]="students"
@@ -27,5 +27,5 @@
       (pageChange)="currentPage = $event"
     >
     </app-data-table>
-  </div>
+  </main>
 </div>

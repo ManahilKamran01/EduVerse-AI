@@ -19,7 +19,6 @@ import {
 export class TrackStudentComponent {
   constructor(private router: Router) {}
 
-  // Dropdown filters configuration
   dropdowns = [
     {
       key: 'course',
@@ -33,10 +32,8 @@ export class TrackStudentComponent {
     },
   ];
 
-  // Filter state
   filters: any = { search: '', course: '', status: '' };
 
-  // Table columns
   columns: TableColumn[] = [
     { key: 'name', label: 'Student Name', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
@@ -46,7 +43,6 @@ export class TrackStudentComponent {
     { key: 'action', label: 'Action', type: 'link', link: '/teacher/student-details' },
   ];
 
-  // Student data
   students = [
     {
       id: 1,
@@ -82,18 +78,16 @@ export class TrackStudentComponent {
     },
   ];
 
-  // Pagination
+
   currentPage = 1;
   pageSize = 5;
   totalItems = this.students.length;
 
-  // Handle filter changes
   onFiltersChange(updatedFilters: any) {
     this.filters = updatedFilters;
     this.applyFilters();
   }
 
-  // Apply filters to student list
   applyFilters() {
     this.students = this.getAllStudents().filter((student) => {
       const matchesSearch = this.filters.search
@@ -114,7 +108,6 @@ export class TrackStudentComponent {
     this.totalItems = this.students.length;
   }
 
-  // Get all student data
   getAllStudents() {
     return [
       {
@@ -152,14 +145,11 @@ export class TrackStudentComponent {
     ];
   }
 
-  // Return color based on progress value
   getProgressColor(progress: number): string {
     if (progress >= 80) return 'bg-green-500';
     if (progress >= 50) return 'bg-yellow-400';
     return 'bg-red-500';
   }
-
-  // Navigate to student details page
   onActionClick(student: any) {
     this.router.navigate(['/teacher/student-details', student.id]);
   }
