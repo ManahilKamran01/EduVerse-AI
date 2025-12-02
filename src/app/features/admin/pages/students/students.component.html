@@ -1,11 +1,11 @@
 <div class="transition-all min-h-screen bg-gray-50">
     <app-header pageTitle="Students"></app-header>
-  
+
     <main class="p-6">
-  
+
       <app-filters
         [dropdowns]="[
-            {key: 'status', label: 'Status', options: ['Enrolled', 'Graduated', 'Dropped']}
+            {key: 'status', label: 'Status', options: ['Enrolled', 'Graduated', 'Dropped', 'Suspended']}
         ]"
         searchPlaceholder="Search by name or email"
         (filtersChange)="onFiltersChange($event)"
@@ -25,10 +25,8 @@
         [totalItems]="filteredStudents.length"
         [pageSize]="5"
         [currentPage]="currentPage"
-        (pageChange)="onPageChange($event)"
-        >
+        (pageChange)="onPageChange($event)">
       </app-data-table>
-  
+
     </main>
 </div>
-

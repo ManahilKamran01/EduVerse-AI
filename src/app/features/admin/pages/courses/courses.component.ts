@@ -1,39 +1,51 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
+
 @Component({
   selector: 'app-courses',
-  imports: [HeaderComponent, DataTableComponent, FiltersComponent],
+  standalone: true,
+  imports: [HeaderComponent, DataTableComponent, FiltersComponent, HttpClientModule],
   templateUrl: './courses.component.html',
-  styleUrl: './courses.component.css',
+  styleUrls: ['./courses.component.css'],
 })
-export class CoursesComponent {
-  currentPage = 1;   // track current page
+export class CoursesComponent implements OnInit {
+  currentPage = 1;
+  courses: any[] = [];
+  filteredCourses: any[] = [];
+  backendUrl = 'http://127.0.0.1:8000/admin/courses'; // Only defined once
 
-  onPageChange(page: number) {
-    this.currentPage = page;
-    console.log('Page changed:', page);
-    // You could also fetch new data from backend here if needed
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.fetchCourses();
   }
 
+  // Fetch courses from backend
+  fetchCourses(): void {
+    this.http.get<any>(this.backendUrl)
+      .pipe(catchError(err => {
+        console.error(err);
+        return of({ courses: [] });
+      }))
+      .subscribe(res => {
+        this.courses = res.courses.map((c: any) => ({
+          ...c,
+          instructor: c.instructor || 'N/A',
+          status: c.status || 'Active',
+        }));
+        this.filteredCourses = [...this.courses];
+      });
+  }
+
+  // Table columns
   courseColumns: TableColumn[] = [
     { key: 'title', label: 'Course Title', type: 'text' },
     { key: 'code', label: 'Code', type: 'text' },
     { key: 'instructor', label: 'Instructor', type: 'text' },
-    { key: 'enrollment', label: 'Enrollment', type: 'text' }, // Added enrollment column
-    {
-      key: 'category',
-      label: 'Category',
-      type: 'badge',
-      badgeColors: {
-        'Core CS': 'bg-indigo-100 text-indigo-800',
-        'CS Elective': 'bg-purple-100 text-purple-800',
-        'Math/Foundational': 'bg-yellow-100 text-yellow-800',
-        'Science': 'bg-cyan-100 text-cyan-800',
-        'General Education': 'bg-pink-100 text-pink-800',
-      },
-    }, // Added category column
     {
       key: 'status',
       label: 'Status',
@@ -41,189 +53,77 @@ export class CoursesComponent {
       badgeColors: {
         Active: 'bg-green-100 text-green-800',
         Inactive: 'bg-red-100 text-red-800',
-        Upcoming: 'bg-blue-100 text-blue-800',
-        Completed: 'bg-gray-100 text-gray-800',
       },
     },
   ];
 
-  courses = [
-    {
-      "id": 1,
-      "title": "Introduction to Programming",
-      "code": "CS101",
-      "instructor": "John Doe",
-      "status": "Active",
-      "category": "Core CS",
-      "enrollment": 150
-    },
-    {
-      "id": 2,
-      "title": "Data Structures",
-      "code": "CS201",
-      "instructor": "Jane Smith",
-      "status": "Upcoming",
-      "category": "Core CS",
-      "enrollment": 120
-    },
-    {
-      "id": 3,
-      "title": "Database Systems",
-      "code": "CS301",
-      "instructor": "Robert Brown",
-      "status": "Inactive",
-      "category": "Core CS",
-      "enrollment": 95
-    },
-    {
-      "id": 4,
-      "title": "Operating Systems",
-      "code": "CS401",
-      "instructor": "Ali Khan",
-      "status": "Completed",
-      "category": "Core CS",
-      "enrollment": 80
-    },
-    {
-      "id": 5,
-      "title": "Web Development Basics",
-      "code": "CS501",
-      "instructor": "Alice Green",
-      "status": "Active",
-      "category": "CS Elective",
-      "enrollment": 95
-    },
-    {
-      "id": 6,
-      "title": "Algorithms Analysis",
-      "code": "CS502",
-      "instructor": "Michael Davis",
-      "status": "Upcoming",
-      "category": "CS Elective",
-      "enrollment": 102
-    },
-    {
-      "id": 7,
-      "title": "Computer Networking",
-      "code": "CS503",
-      "instructor": "Emily Wilson",
-      "status": "Inactive",
-      "category": "CS Elective",
-      "enrollment": 109
-    },
-    {
-      "id": 8,
-      "title": "Artificial Intelligence",
-      "code": "CS504",
-      "instructor": "David Clark",
-      "status": "Completed",
-      "category": "CS Elective",
-      "enrollment": 116
-    },
-    {
-      "id": 9,
-      "title": "Machine Learning",
-      "code": "CS505",
-      "instructor": "Olivia Hall",
-      "status": "Active",
-      "category": "CS Elective",
-      "enrollment": 123
-    },
-    {
-      "id": 10,
-      "title": "Software Engineering",
-      "code": "CS506",
-      "instructor": "Chris Baker",
-      "status": "Upcoming",
-      "category": "CS Elective",
-      "enrollment": 130
-    },
-    {
-      "id": 11,
-      "title": "Cloud Computing",
-      "code": "CS507",
-      "instructor": "Sophia Moore",
-      "status": "Inactive",
-      "category": "CS Elective",
-      "enrollment": 62
-    },
-    {
-      "id": 12,
-      "title": "Cyber Security",
-      "code": "CS508",
-      "instructor": "Mark King",
-      "status": "Completed",
-      "category": "CS Elective",
-      "enrollment": 69
-    },
-    {
-      "id": 13,
-      "title": "Mobile App Development",
-      "code": "CS509",
-      "instructor": "Laura Adams",
-      "status": "Active",
-      "category": "CS Elective",
-      "enrollment": 76
-    },
-    {
-      "id": 14,
-      "title": "Calculus I",
-      "code": "CS510",
-      "instructor": "Kevin Hill",
-      "status": "Upcoming",
-      "category": "Math/Foundational",
-      "enrollment": 83
-    },
-    {
-      "id": 15,
-      "title": "Physics for Engineers",
-      "code": "CS511",
-      "instructor": "Mia Scott",
-      "status": "Inactive",
-      "category": "Science",
-      "enrollment": 90
-    },
-    {
-      "id": 16,
-      "title": "Discrete Mathematics",
-      "code": "CS512",
-      "instructor": "George Taylor",
-      "status": "Completed",
-      "category": "Math/Foundational",
-      "enrollment": 97
-    },
-    {
-      "id": 17,
-      "title": "Technical Writing",
-      "code": "CS513",
-      "instructor": "Anna Evans",
-      "status": "Active",
-      "category": "CS Elective",
-      "enrollment": 104
-    }
-  ];
-
-  onEditCourse(course: any) {
-    console.log('Edit clicked for course:', course);
+  // Pagination
+  onPageChange(page: number): void {
+    this.currentPage = page;
   }
 
-  onDeleteCourse(course: any) {
-    console.log('Delete clicked for course:', course);
+  // Edit course
+  onEditCourse(course: any): void {
+    const updatedTitle = prompt('Update course title', course.title);
+    if (!updatedTitle) return;
+
+    const updatedCourse = { title: updatedTitle };
+
+    this.http.patch(`${this.backendUrl}/${course.id}`, updatedCourse)
+      .pipe(catchError(err => {
+        console.error(err);
+        alert('Failed to update course');
+        return of(null);
+      }))
+      .subscribe((res: any) => {
+        if (res) {
+          // Update the course locally instead of fetching again
+          const index = this.courses.findIndex(c => c.id === res.id);
+          if (index !== -1) {
+            this.courses[index] = { ...this.courses[index], ...res };
+          }
+
+          const fIndex = this.filteredCourses.findIndex(c => c.id === res.id);
+          if (fIndex !== -1) {
+            this.filteredCourses[fIndex] = { ...this.filteredCourses[fIndex], ...res };
+          }
+        }
+      });
   }
 
-  filteredCourses = [...this.courses];
+  // Delete course
+  onDeleteCourse(course: any): void {
+    if (!confirm(`Are you sure you want to delete "${course.title}"?`)) return;
 
-  onFiltersChange(filters: { [key: string]: string }) {
-    this.currentPage = 1; // → when user changes filters, we should go back to page 1.
+    this.http.delete(`${this.backendUrl}/${course.id}`)
+      .pipe(catchError(err => {
+        console.error(err);
+        alert('Failed to delete course');
+        return of(null);
+      }))
+      .subscribe(() => {
+        this.courses = this.courses.filter(c => c.id !== course.id);
+        this.filteredCourses = this.filteredCourses.filter(c => c.id !== course.id);
+      });
+  }
+
+  // Filtering
+  onFiltersChange(filters: { [key: string]: string } | undefined): void {
+    this.currentPage = 1;
+    const search = filters?.['search']?.toLowerCase() || '';
+    const statusFilter = filters?.['status']?.toLowerCase() || '';
+
     this.filteredCourses = this.courses.filter(c => {
-      const matchesSearch = !filters['search'] ||
-        c.title.toLowerCase().includes(filters['search'].toLowerCase()) ||
-        c.instructor.toLowerCase().includes(filters['search'].toLowerCase()) ||
-        c.category.toLowerCase().includes(filters['search'].toLowerCase());
+      const matchesSearch =
+        !search ||
+        c.title.toLowerCase().includes(search) ||
+        c.code.toLowerCase().includes(search) ||
+        c.instructor.toLowerCase().includes(search);
 
-      const matchesStatus = !filters['status'] || c.status === filters['status'];
+      const matchesStatus =
+        !statusFilter || c.status.toLowerCase() === statusFilter;
 
       return matchesSearch && matchesStatus;
-    })
+    });
   }
 }

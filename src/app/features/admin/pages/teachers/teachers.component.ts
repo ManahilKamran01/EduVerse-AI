@@ -1,26 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TableColumn, DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
-import { CommonModule } from '@angular/common';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { catchError, of } from 'rxjs';
+
+interface FilterOptions {
+  [key: string]: string | undefined;
+}
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [HeaderComponent, DataTableComponent, CommonModule, FiltersComponent, ButtonComponent],
+  imports: [HeaderComponent, DataTableComponent, CommonModule, FiltersComponent, ButtonComponent, HttpClientModule],
   templateUrl: './teachers.component.html',
-  styleUrl: './teachers.component.css'
+  styleUrls: ['./teachers.component.css']
 })
-export class TeachersComponent {
-  currentPage = 1;   // track current page
-
-  onPageChange(page: number) {
-    this.currentPage = page;
-    console.log('Page changed:', page);
-    // You could also fetch new data from backend here if needed
-  }
-
+export class TeachersComponent implements OnInit {
+  currentPage = 1;
+  teachers: any[] = [];
+  filteredTeachers: any[] = [];
+  backendUrl = 'http://127.0.0.1:8000/admin/teachers';
 
   teacherColumns: TableColumn[] = [
     { key: 'avatar', label: 'Teacher', type: 'avatar' },
@@ -38,204 +40,106 @@ export class TeachersComponent {
     },
   ];
 
-  teachers = [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john.doe@example.com",
-      "courses": 12,
-      "students": 345,
-      "role": "Teacher",
-      "status": "Active",
-      "avatar": "JD"
-    },
-    {
-      "id": 2,
-      "name": "Jane Smith",
-      "email": "jane.smith@example.com",
-      "courses": 8,
-      "students": 210,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "JS"
-    },
-    {
-      "id": 3,
-      "name": "Robert Brown",
-      "email": "robert.brown@example.com",
-      "courses": 15,
-      "students": 450,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "RB"
-    },
-    {
-      "id": 4,
-      "name": "Alice Green",
-      "email": "alice.green@example.com",
-      "courses": 10,
-      "students": 280,
-      "role": "Teacher",
-      "status": "Active",
-      "avatar": "AG"
-    },
-    {
-      "id": 5,
-      "name": "Michael Davis",
-      "email": "michael.davis@example.com",
-      "courses": 7,
-      "students": 190,
-      "role": "Sub-Admin",
-      "status": "Inactive",
-      "avatar": "MD"
-    },
-    {
-      "id": 6,
-      "name": "Emily Wilson",
-      "email": "emily.wilson@example.com",
-      "courses": 14,
-      "students": 420,
-      "role": "Teacher",
-      "status": "Active",
-      "avatar": "EW"
-    },
-    {
-      "id": 7,
-      "name": "David Clark",
-      "email": "david.clark@example.com",
-      "courses": 9,
-      "students": 250,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "DC"
-    },
-    {
-      "id": 8,
-      "name": "Olivia Hall",
-      "email": "olivia.hall@example.com",
-      "courses": 11,
-      "students": 280,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "OH"
-    },
-    {
-      "id": 9,
-      "name": "Chris Baker",
-      "email": "chris.baker@example.com",
-      "courses": 13,
-      "students": 310,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "CB"
-    },
-    {
-      "id": 10,
-      "name": "Sophia Moore",
-      "email": "sophia.moore@example.com",
-      "courses": 15,
-      "students": 340,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "SM"
-    },
-    {
-      "id": 11,
-      "name": "Mark King",
-      "email": "mark.king@example.com",
-      "courses": 10,
-      "students": 370,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "MK"
-    },
-    {
-      "id": 12,
-      "name": "Laura Adams",
-      "email": "laura.adams@example.com",
-      "courses": 12,
-      "students": 400,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "LA"
-    },
-    {
-      "id": 13,
-      "name": "Kevin Hill",
-      "email": "kevin.hill@example.com",
-      "courses": 14,
-      "students": 430,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "KH"
-    },
-    {
-      "id": 14,
-      "name": "Mia Scott",
-      "email": "mia.scott@example.com",
-      "courses": 9,
-      "students": 260,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "MS"
-    },
-    {
-      "id": 15,
-      "name": "George Taylor",
-      "email": "george.taylor@example.com",
-      "courses": 11,
-      "students": 290,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "GT"
-    },
-    {
-      "id": 16,
-      "name": "Anna Evans",
-      "email": "anna.evans@example.com",
-      "courses": 13,
-      "students": 320,
-      "role": "Teacher",
-      "status": "Inactive",
-      "avatar": "AE"
-    },
-    {
-      "id": 17,
-      "name": "Peter Wright",
-      "email": "peter.wright@example.com",
-      "courses": 15,
-      "students": 350,
-      "role": "Sub-Admin",
-      "status": "Active",
-      "avatar": "PW"
-    }
-  ];
+  constructor(private http: HttpClient) {}
 
-  onAddTeacher() {
-    // will open a modal
-    console.log('Add clicked');
+  ngOnInit(): void {
+    this.fetchTeachers();
   }
 
-  onEditTeacher(teacher: any) {
-    console.log('Edit clicked for:', teacher);
+  fetchTeachers(): void {
+    this.http.get<{ total: number; teachers: any[] }>(this.backendUrl)
+      .pipe(
+        catchError(err => {
+          console.error(err);
+          alert('Failed to fetch teachers');
+          return of({ teachers: [] });
+        })
+      )
+      .subscribe(res => {
+        this.teachers = res.teachers.map(t => ({
+          ...t,
+          id: t.id,                           // Already mapped from backend
+          name: t.name || t.fullName || '',
+          avatar: t.name ? t.name.split(' ').map((n: string) => n[0]).join('') : '',
+          courses: t.assignedCourses?.length || 0,
+          students: t.totalStudents || 0,
+          role: t.role || 'Teacher',
+          status: t.status === 'Active' ? 'Active' : 'Inactive'
+        }));
+        this.filteredTeachers = [...this.teachers];
+      });
   }
 
-  onDeleteTeacher(teacher: any) {
-    console.log('Delete clicked for:', teacher);
+  onAddTeacher(): void {
+    console.log('Add teacher clicked');
+    // Implement modal or navigation to add page
+  }
+onEditTeacher(teacher: any): void {
+  const updatedName = prompt('Update teacher name', teacher.name);
+  if (!updatedName) return;
+
+  const payload = { fullName: updatedName };
+
+  this.http.patch(`${this.backendUrl}/${teacher.id}`, payload)
+    .pipe(
+      catchError(err => {
+        console.error(err);
+        alert('Failed to update teacher');
+        return of(null);
+      })
+    )
+    .subscribe((res: any) => {
+      if (res) {
+        // Create a NEW object to trigger Angular change detection
+        const updatedTeacher = {
+          id: res.id,
+          name: res.name,
+          email: res.email,
+          assignedCourses: res.assignedCourses,
+          totalStudents: res.totalStudents,
+          role: res.role,
+          status: res.status,
+          avatar: res.name ? res.name.split(' ').map((n: string) => n[0]).join('') : ''
+        };
+
+        // Replace the teacher in both arrays
+        this.teachers = this.teachers.map(t => t.id === teacher.id ? updatedTeacher : t);
+        this.filteredTeachers = this.filteredTeachers.map(t => t.id === teacher.id ? updatedTeacher : t);
+      }
+    });
+}
+
+
+  onDeleteTeacher(teacher: any): void {
+    if (!confirm(`Are you sure you want to delete "${teacher.name}"?`)) return;
+
+    this.http.delete(`${this.backendUrl}/${teacher.id}`)
+      .pipe(
+        catchError(err => {
+          console.error(err);
+          alert('Failed to delete teacher');
+          return of(null);
+        })
+      )
+      .subscribe(() => {
+        this.teachers = this.teachers.filter(t => t.id !== teacher.id);
+        this.filteredTeachers = this.filteredTeachers.filter(t => t.id !== teacher.id);
+      });
   }
 
-  filteredTeachers = [...this.teachers];
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
 
-  onFiltersChange(filters: { [key: string]: string }) {
-    this.currentPage = 1; // → when user changes filters, we should go back to page 1.
+  onFiltersChange(filters: FilterOptions): void {
+    this.currentPage = 1;
+    const search = (filters['search'] || '').toLowerCase();
+    const statusFilter = filters['status'] || '';
+
     this.filteredTeachers = this.teachers.filter(t => {
-      const matchesSearch = !filters['search'] ||
-        t.name.toLowerCase().includes(filters['search'].toLowerCase()) ||
-        t.email.toLowerCase().includes(filters['search'].toLowerCase());
-
-      const matchesStatus = !filters['status'] || t.status === filters['status'];
-
+      const matchesSearch = !search || t.name.toLowerCase().includes(search) || t.email.toLowerCase().includes(search);
+      const matchesStatus = !statusFilter || t.status === statusFilter;
       return matchesSearch && matchesStatus;
-    })
+    });
   }
 }
