@@ -115,19 +115,46 @@ export class CourseDetailComponent implements OnInit {
   }
 
   get learningButtonText(): string {
-    if (this.progress === 100) return "You've Completed This Course!";
+    if (this.progress === 100) return "Enroll Again";
     if (this.progress > 0) return "Continue Learning";
     return "Start Learning";
+  }
+
+  get isCompletedCourse(): boolean {
+    return this.isEnrolled && this.progress === 100;
   }
 
   startLearning() {
     this.router.navigate(['/student/learn', this.courseId]);
   }
 
+  async handleEnrolledAction() {
+    if (!this.isCompletedCourse) {
+      this.startLearning();
+      return;
+    }
+
+    const confirmed = await this.confirmDialogService.confirm(
+      'Enroll Again',
+      'This will reset your progress, quizzes, adaptive lessons, and tutor history for this course. Continue?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.processEnrollment();
+  }
+
   enroll() {
     const user = this.authService.getUser();
     if (!user) {
       this.router.navigate(['/login']);
+      return;
+    }
+
+    if (this.isCompletedCourse) {
+      this.processEnrollment();
       return;
     }
 
@@ -170,6 +197,8 @@ export class CourseDetailComponent implements OnInit {
     this.courseService.enrollStudent(this.courseId, studentId, tenantId).subscribe({
       next: () => {
         this.enrolling = false;
+        this.isEnrolled = true;
+        this.progress = 0;
         this.showSuccessModal = true;
       },
       error: async (err) => {

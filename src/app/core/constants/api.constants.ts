@@ -39,4 +39,17 @@ export const ENDPOINTS = {
     SUBMISSION: (submissionId: string) =>
       `${API_BASE_URL}/assignment-submissions/${submissionId}`,
   },
+  ADAPTIVE: {
+    BASE: `${API_BASE_URL}/adaptive`,
+    GENERATE_LESSON: `${API_BASE_URL}/adaptive/generate-lesson`,
+    GENERATE_BASE_LESSON: `${API_BASE_URL}/adaptive/generate-base-lesson`,
+    CLASSIFICATION: (studentId: string) => `${API_BASE_URL}/adaptive/student/${studentId}/classification`,
+    GENERATED_LESSONS: (studentId: string) => `${API_BASE_URL}/adaptive/student/${studentId}/generated-lessons`,
+    GENERATE_QUIZ: `${API_BASE_URL}/adaptive/generate-quiz`,
+  },
+  AI_TUTOR: {
+    BASE: `${API_BASE_URL}/ai-tutor`,
+    CHAT: `${API_BASE_URL}/ai-tutor/chat`,
+    SESSION: (courseId: string) => `${API_BASE_URL}/ai-tutor/session/${courseId}`,
+  },
 } as const;

@@ -24,211 +24,41 @@
 
     <!-- Body -->
     <div class="p-6 space-y-4 overflow-y-auto flex-1">
-      <!-- Lesson Title -->
+      <!-- Lesson Name -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
-          Lesson Title <span class="text-red-500">*</span>
+          Lesson Name <span class="text-red-500">*</span>
         </label>
         <input
           type="text"
           [(ngModel)]="title"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          placeholder="e.g., Why tokens matter?"
+          placeholder="e.g., Introduction to Photosynthesis"
           [class.border-red-500]="title.length > 0 && title.length < 3"
         />
         <p *ngIf="title.length > 0 && title.length < 3" class="mt-1 text-xs text-red-500">
-          Title must be at least 3 characters
+          Name must be at least 3 characters
         </p>
       </div>
 
-      <!-- Lesson Type -->
+      <!-- Lesson Description / Content -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Lesson Type
-        </label>
-        <div class="flex gap-3">
-          <button
-            *ngFor="let lessonType of lessonTypes"
-            type="button"
-            (click)="setType(lessonType.value)"
-            class="flex-1 py-2 px-3 rounded-lg border-2 transition-colors flex items-center justify-center gap-2"
-            [ngClass]="{
-              'border-blue-950 bg-blue-50 text-blue-950': type === lessonType.value,
-              'border-gray-200 text-gray-600 hover:border-gray-300': type !== lessonType.value
-            }"
-          >
-            <!-- Video Icon -->
-            <svg *ngIf="lessonType.icon === 'video'" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            <!-- Document Icon -->
-            <svg *ngIf="lessonType.icon === 'document'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <!-- Quiz Icon -->
-            <svg *ngIf="lessonType.icon === 'quiz'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ lessonType.label }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Duration (for Video and Document) -->
-      <div *ngIf="type !== 'quiz'">
         <label class="block text-sm font-medium text-gray-700 mb-1">
-          Duration <span *ngIf="type === 'document'" class="text-gray-400 font-normal">(Optional - auto-calculated if empty)</span>
-          <span *ngIf="type === 'video'" class="text-red-500">*</span>
+          Lesson Description <span class="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          [(ngModel)]="duration"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          placeholder="e.g., 05:23"
-          [class.border-red-500]="duration && !durationValid"
-        />
-        <p class="mt-1 text-xs text-gray-500">Format: MM:SS (e.g., 05:23)</p>
-        <p *ngIf="duration && !durationValid" class="mt-1 text-xs text-red-500">
-          Please use MM:SS format
-        </p>
-      </div>
-
-      <!-- VIDEO: URL Input -->
-      <div *ngIf="type === 'video'">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Video URL <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="url"
+        <textarea
           [(ngModel)]="content"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          placeholder="https://example.com/video.mp4"
-          [class.border-red-500]="!content.trim()"
-        />
-        <p class="mt-1 text-xs text-gray-500">Enter a direct link to the video (YouTube, Vimeo, or direct URL)</p>
-      </div>
-
-      <!-- DOCUMENT: Mode Toggle + Content -->
-      <div *ngIf="type === 'document'">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Document Content <span class="text-red-500">*</span>
-        </label>
-        
-        <!-- Mode Toggle -->
-        <div class="flex gap-2 mb-3">
-          <button
-            type="button"
-            (click)="setDocumentMode('write')"
-            class="flex-1 py-2 px-3 rounded-lg border text-sm transition-colors"
-            [ngClass]="{
-              'border-blue-950 bg-blue-50 text-blue-950': documentInputMode === 'write',
-              'border-gray-200 text-gray-600 hover:border-gray-300': documentInputMode !== 'write'
-            }"
-          >
-            ✍️ Write Content
-          </button>
-          <button
-            type="button"
-            (click)="setDocumentMode('upload')"
-            class="flex-1 py-2 px-3 rounded-lg border text-sm transition-colors"
-            [ngClass]="{
-              'border-blue-950 bg-blue-50 text-blue-950': documentInputMode === 'upload',
-              'border-gray-200 text-gray-600 hover:border-gray-300': documentInputMode !== 'upload'
-            }"
-          >
-            🔗 Document URL
-          </button>
-        </div>
-
-        <!-- Write Mode: Rich Text -->
-        <div *ngIf="documentInputMode === 'write'">
-          <!-- Formatting Toolbar (MS Word Style) -->
-          <div class="flex flex-wrap gap-0.5 mb-0 p-2 bg-gray-100 rounded-t-lg border border-b-0 border-gray-300">
-            <button type="button" (click)="applyFormat('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm font-bold" title="Bold (Ctrl+B)">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
-            </button>
-            <button type="button" (click)="applyFormat('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm italic" title="Italic (Ctrl+I)">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
-            </button>
-            <button type="button" (click)="applyFormat('underline')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm underline" title="Underline (Ctrl+U)">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"/></svg>
-            </button>
-            <span class="border-l border-gray-300 mx-1 h-6 self-center"></span>
-            <button type="button" (click)="applyFormat('heading')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm font-medium" title="Heading">
-              H
-            </button>
-            <button type="button" (click)="applyFormat('bullet')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm" title="Bullet List">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
-            </button>
-            <button type="button" (click)="applyFormat('numbered')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm" title="Numbered List">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
-            </button>
-            <span class="border-l border-gray-300 mx-1 h-6 self-center"></span>
-            <button type="button" (click)="applyFormat('link')" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-sm" title="Insert Link">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-            </button>
-          </div>
-          <textarea
-            #documentContent
-            [(ngModel)]="content"
-            rows="8"
-            class="w-full px-3 py-2 border border-gray-300 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
-            placeholder="Write your document content here...
-
-Use the toolbar above to format your text like in MS Word:
-• Bold, Italic, Underline
-• Headings and Lists
-• Links to external resources"
-            [class.border-red-500]="!content.trim()"
-          ></textarea>
-          <p class="mt-1 text-xs text-gray-500">Use the formatting toolbar for rich text. Reading time will be auto-calculated (~200 words/min)</p>
-        </div>
-
-        <!-- Upload Mode: URL -->
-        <div *ngIf="documentInputMode === 'upload'">
-          <input
-            type="url"
-            [(ngModel)]="documentUrl"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="https://example.com/document.pdf"
-            [class.border-red-500]="!documentUrl.trim()"
-          />
-          <p class="mt-1 text-xs text-gray-500">Enter a link to an existing document (PDF, Google Doc, etc.)</p>
-        </div>
-      </div>
-
-      <!-- QUIZ: Dropdown Selection -->
-      <div *ngIf="type === 'quiz'">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Select Quiz <span class="text-red-500">*</span>
-        </label>
-        
-        <div *ngIf="isLoadingQuizzes" class="py-3 flex items-center gap-2 text-sm text-gray-500">
-          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-950"></div>
-          Loading quizzes for this course...
-        </div>
-        
-        <div *ngIf="!isLoadingQuizzes && availableQuizzes.length === 0" class="py-3 px-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p class="text-sm text-yellow-800">
-            <strong>No quizzes available for this course.</strong><br>
-            Please create a quiz first from the Quizzes section before adding a quiz lesson.
-          </p>
-        </div>
-        
-        <div *ngIf="!isLoadingQuizzes && availableQuizzes.length > 0">
-          <select
-            [(ngModel)]="selectedQuizId"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
-            [class.border-red-500]="!selectedQuizId"
-            required
-          >
-            <option value="" disabled>-- Select a Quiz --</option>
-            <option *ngFor="let quiz of availableQuizzes" [value]="quiz.id">
-              {{ quiz.title }} ({{ quiz.questionsCount }} questions)
-            </option>
-          </select>
-          <p class="mt-1 text-xs text-gray-500">Choose from quizzes created for this course</p>
-        </div>
+          rows="10"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+          placeholder="Describe the lesson content or provide the full text here..."
+          [class.border-red-500]="content.length > 0 && content.length < 10"
+        ></textarea>
+        <p *ngIf="content.length > 0 && content.length < 10" class="mt-1 text-xs text-red-500">
+          Description must be at least 10 characters
+        </p>
+        <p class="mt-1 text-xs text-gray-500">
+          This description will be used as the basis for this lesson's content.
+        </p>
       </div>
     </div>
 
@@ -243,7 +73,7 @@ Use the toolbar above to format your text like in MS Word:
       </button>
       <button
         type="button"
-        [disabled]="!isValid || !durationValid"
+        [disabled]="!isValid"
         class="px-4 py-2 rounded-lg text-white bg-blue-950 hover:bg-blue-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         (click)="onSave()"
       >

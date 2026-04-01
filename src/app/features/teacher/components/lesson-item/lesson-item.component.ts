@@ -22,12 +22,25 @@ export class LessonItemComponent {
       case 'video':
         return 'Video';
       case 'document':
-        return 'Document';
+        return this.isAiGenerated ? 'AI Lesson' : 'Document';
       case 'quiz':
         return 'Quiz';
       default:
         return 'Video';
     }
+  }
+
+  get isAiGenerated(): boolean {
+    if (this.lesson.type !== 'document' || !this.lesson.content) return false;
+    try {
+      if (this.lesson.content.includes('isAiGenerated')) {
+        const parsed = JSON.parse(this.lesson.content);
+        return parsed.isAiGenerated === true;
+      }
+    } catch (e) {
+      // Not a JSON string
+    }
+    return false;
   }
 
   toggleMenu(event: Event): void {

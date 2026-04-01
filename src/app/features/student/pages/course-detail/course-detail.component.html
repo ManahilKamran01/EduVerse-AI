@@ -75,7 +75,7 @@
                             Enroll Now - {{ course.price ? (course.price | currency) : 'Free' }}
                         </app-button>
                         <app-button *ngIf="isEnrolled" [variant]="'primary'" [size]="'lg'" [fullWidth]="true"
-                            customColor="bg-slate-900 text-white font-bold shadow-lg" (buttonClick)="startLearning()">
+                            customColor="bg-slate-900 text-white font-bold shadow-lg" (buttonClick)="handleEnrolledAction()">
                             {{ learningButtonText }}
                         </app-button>
                     </div>
@@ -285,7 +285,7 @@
 
                             <app-button *ngIf="isEnrolled" [variant]="'primary'" [size]="'xl'" [fullWidth]="true"
                                 customColor="bg-slate-900 hover:bg-black text-white font-bold shadow-xl shadow-slate-900/30 transform hover:-translate-y-1 transition-all duration-300"
-                                (buttonClick)="startLearning()">
+                                (buttonClick)="handleEnrolledAction()">
                                 {{ learningButtonText }}
                             </app-button>
 

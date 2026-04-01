@@ -6,17 +6,21 @@ import { API_BASE_URL } from '../../../core/constants/api.constants';
 export interface QuizQuestion {
     question: string;
     options: string[];
-    answer: string;
+    answer?: string;
+    correctAnswer?: string;
 }
 
 export interface Quiz {
     id: string;
     courseId: string;
-    quizNumber: number;
+    lessonId?: string;
+    topic?: string;
+    quizNumber?: number;
     description?: string;
     questions: QuizQuestion[];
-    totalMarks: number;
+    totalMarks?: number;
     timeLimitMinutes?: number;
+    generatedAt?: string;
 }
 
 @Injectable({
@@ -38,5 +42,19 @@ export class QuizService {
         return this.http.get<Quiz>(`${this.baseUrl}/${quizId}`, {
             headers: this.getHeaders()
         });
+    }
+
+    getMyQuizzes(): Observable<Quiz[]> {
+        return this.http.get<Quiz[]>(`${this.baseUrl}/student/me`, {
+            headers: this.getHeaders()
+        }).pipe(
+            map((quizzes) =>
+                quizzes.map((quiz) => ({
+                    ...quiz,
+                    description: quiz.description || quiz.topic,
+                    totalMarks: quiz.totalMarks ?? quiz.questions?.length ?? 0,
+                }))
+            )
+        );
     }
 }

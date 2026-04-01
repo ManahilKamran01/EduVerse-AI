@@ -119,6 +119,12 @@ export class AuthService {
     if (user.tenantId) {
       localStorage.setItem('tenantId', user.tenantId);
     }
+    if (user.id) {
+      localStorage.setItem('eduverse_user_id', user.id);
+    }
+    if (user.studentId) {
+      localStorage.setItem('eduverse_student_id', user.studentId);
+    }
     this.currentUserSubject.next(user);
   }
 
@@ -176,6 +182,12 @@ export class AuthService {
     const user = this.mapJwtToUser(payload);
     if (user.tenantId) {
       localStorage.setItem('tenantId', user.tenantId);
+    }
+    if (user.id) {
+      localStorage.setItem('eduverse_user_id', user.id);
+    }
+    if (user.studentId) {
+      localStorage.setItem('eduverse_student_id', user.studentId);
     }
     console.log('Mapped user:', user); // <-- debug
     this.currentUserSubject.next(user);

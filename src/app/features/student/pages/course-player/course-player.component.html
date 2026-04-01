@@ -30,7 +30,7 @@
     <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar: Curriculum Navigation -->
         <aside class="bg-white border-r border-slate-200 transition-all duration-300 overflow-y-auto flex-shrink-0"
-            [class.w-64]="isSidebarOpen" [class.w-0]="!isSidebarOpen">
+            [class.w-72]="isSidebarOpen" [class.w-0]="!isSidebarOpen">
             <div class="p-5">
                 <h2 class="text-slate-900 font-bold mb-6 flex items-center justify-between">
                     <span class="truncate">Course Content</span>
@@ -73,6 +73,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ✨ Personalized Path Section -->
+                <div *ngIf="personalizedLessons.length > 0" class="mt-8 space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">✨ Personalized Path</span>
+                    </div>
+                    <div class="space-y-1">
+                        <button *ngFor="let lesson of personalizedLessons" (click)="openPersonalizedLesson(lesson)"
+                            [class.bg-indigo-50]="activeAdaptiveLesson?.id === lesson.id"
+                            class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all text-left group border border-transparent"
+                            [class.border-indigo-100]="activeAdaptiveLesson?.id === lesson.id">
+                            <div class="relative flex-shrink-0">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-semibold text-slate-800 truncate"
+                                    [class.text-indigo-600]="activeAdaptiveLesson?.id === lesson.id">{{ lesson.title }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">AI Generated</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -89,11 +114,11 @@
                     <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">
                         {{ course?.modules?.[activeModuleIndex]?.title }}
                     </p>
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">{{ activeLesson.title }}</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">{{ getDisplayedLessonTitle() }}</h2>
                 </div>
 
                 <!-- Video Player / Content Frame -->
-                <div *ngIf="activeLesson.type === 'video'"
+                <div *ngIf="!activeAdaptiveLesson && activeLesson.type === 'video'"
                     class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl mb-8 border border-slate-800">
                     <iframe *ngIf="videoUrl" [src]="videoUrl" class="w-full h-full" frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -107,18 +132,45 @@
                     </div>
                 </div>
 
+                <!-- AI Lesson Generation Loading State -->
+                <div *ngIf="isGeneratingAiLesson" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+                    <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-xs text-center border border-indigo-100">
+                        <div class="w-20 h-20 mb-6 relative">
+                            <div class="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                            <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fa-solid fa-wand-magic-sparkles text-2xl text-indigo-500 animate-pulse"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Preparing your lesson...</h3>
+                        <p class="text-sm text-slate-500">Our AI is expanding the teacher's lesson notes into a fuller student-ready lesson.</p>
+                    </div>
+                </div>
+
                 <!-- Text Content & Quiz Interface -->
-                <div *ngIf="activeLesson.type !== 'video'"
+                <div *ngIf="activeLesson.type !== 'video' || activeAdaptiveLesson || activeQuiz"
                     class="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-slate-100 mb-8 min-h-[400px]">
 
-                    <!-- Standard Text Lesson -->
-                    <div *ngIf="activeLesson.type !== 'quiz'" class="prose prose-slate max-w-none">
-                        <div class="text-slate-600 leading-relaxed text-lg"
+                    <!-- Standard Text Lesson / AI Lesson -->
+                    <div *ngIf="isWaitingForAdaptiveLesson && activeLesson.type !== 'quiz'" class="flex flex-col items-center justify-center py-20 text-center">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-500 mb-4"></i>
+                        <p class="text-slate-700 font-semibold">Preparing your personalized lesson...</p>
+                        <p class="text-sm text-slate-500 mt-2">The adaptive version of this lesson is still being generated.</p>
+                    </div>
+
+                    <div *ngIf="!isWaitingForAdaptiveLesson && activeLesson.type !== 'quiz'" class="prose prose-slate max-w-none">
+                        <div *ngIf="activeAdaptiveLesson" class="ai-content-wrapper">
+                            <markdown [data]="activeAdaptiveLesson.content" class="text-slate-600 leading-relaxed text-lg"></markdown>
+                        </div>
+                        <div *ngIf="!activeAdaptiveLesson && !activeLesson.type" class="ai-content-wrapper">
+                            <markdown [data]="activeLesson.content" class="text-slate-600 leading-relaxed text-lg"></markdown>
+                        </div>
+                        <div *ngIf="!activeAdaptiveLesson && activeLesson.type" class="text-slate-600 leading-relaxed text-lg"
                             [innerHTML]="activeLesson.content || 'No content provided for this lesson.'"></div>
                     </div>
 
                     <!-- Interactive Quiz Lesson -->
-                    <div *ngIf="activeLesson.type === 'quiz'" class="quiz-container">
+                    <div *ngIf="activeQuiz" class="quiz-container">
                         <div *ngIf="loadingQuiz" class="flex flex-col items-center justify-center py-20">
                             <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-500 mb-4"></i>
                             <p class="text-slate-500 font-medium">Loading your quiz...</p>
@@ -127,8 +179,8 @@
                         <div *ngIf="!loadingQuiz && activeQuiz">
                             <!-- Quiz Header -->
                             <div class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <h3 class="text-xl font-bold text-slate-800 mb-2">Quiz #{{ activeQuiz.quizNumber }}</h3>
-                                <p class="text-slate-600">{{ activeQuiz.description || 'Test your knowledge on the
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">Quiz #{{ activeQuiz.quizNumber || 'AI' }}</h3>
+                                <p class="text-slate-600">{{ activeQuiz.description || activeQuiz.topic || 'Test your knowledge on the
                                     current topic.' }}</p>
                                 <div class="flex gap-4 mt-4">
                                     <span
@@ -170,9 +222,9 @@
                                 </div>
 
                                 <div class="pt-6 border-t border-slate-100">
-                                    <app-button [variant]="'primary'" [size]="'xl'" [fullWidth]="true"
+                                    <app-button [variant]="'primary'" [size]="'xl'" [fullWidth]="true" [disabled]="submittingQuiz"
                                         (buttonClick)="submitQuiz()">
-                                        Submit Quiz Answers
+                                        {{ submittingQuiz ? 'Submitting...' : 'Submit Quiz Answers' }}
                                     </app-button>
                                 </div>
                             </div>
@@ -211,7 +263,7 @@
                 <div
                     class="flex flex-col sm:flex-row items-center justify-between gap-6 pb-12 border-t border-slate-200 pt-8 mt-12">
                     <div class="flex items-center gap-4">
-                        <app-button [variant]="'primary'" [size]="'lg'" (buttonClick)="markComplete()">
+                        <app-button [variant]="'primary'" [size]="'lg'" [disabled]="isWaitingForAdaptiveLesson" (buttonClick)="markComplete()">
                             <i class="fa-solid fa-circle-check mr-2"></i>
                             {{ isLessonCompleted(activeLesson.id || activeLesson._id) ? 'Completed' : 'Mark as Complete'
                             }}
@@ -223,7 +275,7 @@
                             class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors">
                             <i class="fa-solid fa-chevron-left"></i> Prev
                         </button>
-                        <button (click)="nextLesson()" [disabled]="!hasNextLesson()"
+                        <button (click)="nextLesson()" [disabled]="!hasNextLesson() || isNextLessonLocked()"
                             class="flex items-center gap-2 px-6 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-lg shadow-slate-900/10">
                             Next <i class="fa-solid fa-chevron-right"></i>
                         </button>
@@ -258,7 +310,7 @@
 
         <!-- Right Sidenav: AI Chatbot (Now has more space) -->
         <aside
-            class="w-64 bg-white border-l border-slate-200 flex flex-col hidden md:flex overflow-hidden flex-shrink-0">
+            class="w-72 bg-white border-l border-slate-200 flex flex-col hidden md:flex overflow-hidden flex-shrink-0">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-widest">
                     <i class="fa-solid fa-robot text-indigo-500"></i>
@@ -275,20 +327,32 @@
                         [class.text-slate-800]="msg.sender === 'Student'"
                         [class.rounded-tr-none]="msg.sender === 'Student'" [class.rounded-tl-none]="msg.sender === 'AI'"
                         class="max-w-[95%] p-3 rounded-2xl text-xs leading-relaxed shadow-sm">
-                        {{ msg.text }}
+                        <markdown *ngIf="msg.sender === 'AI'" [data]="msg.text"></markdown>
+                        <span *ngIf="msg.sender === 'Student'">{{ msg.text }}</span>
                     </div>
                     <span class="text-[8px] text-slate-400 mt-1 uppercase px-1">{{ msg.time | date:'shortTime' }}</span>
+                </div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div *ngIf="isSendingChat" class="px-5 py-2">
+                <div class="flex gap-1">
+                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
+                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                 </div>
             </div>
 
             <!-- Input area -->
             <div class="p-4 border-t border-slate-100 mt-auto bg-white">
                 <div class="relative">
-                    <input [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" type="text" placeholder="Ask AI..."
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-xs outline-none focus:border-indigo-500 transition-all">
-                    <button (click)="sendChatMessage()"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
-                        <i class="fa-solid fa-paper-plane"></i>
+                    <input [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" type="text" 
+                        [disabled]="isSendingChat" placeholder="Ask AI..."
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-xs outline-none focus:border-indigo-500 transition-all disabled:opacity-50">
+                    <button (click)="sendChatMessage()" [disabled]="isSendingChat || !chatInput.trim()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors disabled:opacity-30">
+                        <i *ngIf="!isSendingChat" class="fa-solid fa-paper-plane"></i>
+                        <i *ngIf="isSendingChat" class="fa-solid fa-circle-notch fa-spin"></i>
                     </button>
                 </div>
             </div>

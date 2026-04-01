@@ -134,7 +134,7 @@ export class StudentQuizzesComponent implements OnInit {
   /**
    * Step 3: Load student's submissions and merge with quiz data.
    */
-  loadSubmissions(quizzes: Quiz[]): void {
+  loadSubmissions(quizzes: any[]): void {
     this.submissionService.getSubmissionsByStudent(this.studentId).subscribe({
       next: (submissions) => {
         this.submissions = submissions;
@@ -147,7 +147,7 @@ export class StudentQuizzesComponent implements OnInit {
         this.filteredQuizzes = this.quizzes; // Initialize filtered list
 
         // Set up course filter options (unique course names)
-        const courseNames = [...new Set(quizzes.map((q) => q.courseName))];
+        const courseNames = [...new Set(quizzes.map((q) => q.courseName || q.topic || 'Adaptive Quiz'))];
         this.filterDropdowns = [
           {
             key: 'course',
@@ -177,7 +177,7 @@ export class StudentQuizzesComponent implements OnInit {
         this.filteredQuizzes = this.quizzes;
 
         // Set up course filter options
-        const courseNames = [...new Set(quizzes.map((q) => q.courseName))];
+        const courseNames = [...new Set(quizzes.map((q) => q.courseName || q.topic || 'Adaptive Quiz'))];
         this.filterDropdowns = [
           {
             key: 'course',
@@ -204,23 +204,27 @@ export class StudentQuizzesComponent implements OnInit {
   /**
    * Transform backend Quiz to display format with submission status.
    */
-  transformQuizForDisplay(quiz: Quiz): any {
+  transformQuizForDisplay(quiz: any): any {
     // Find if student has already submitted this quiz
     const submission = this.submissions.find((s) => s.quizId === quiz.id);
+    const isAiQuiz = quiz.quizNumber === undefined || quiz.quizNumber === null;
+    const courseLabel = quiz.courseName || quiz.topic || 'Adaptive Quiz';
+    const dueDate = quiz.dueDate || quiz.generatedAt || new Date().toISOString();
+    const totalMarks = quiz.totalMarks || quiz.questions.length;
 
     return {
       id: quiz.id,
-      quizNo: quiz.quizNumber.toString().padStart(2, '0'),
-      course: quiz.courseName,
+      quizNo: isAiQuiz ? 'AI' : quiz.quizNumber.toString().padStart(2, '0'),
+      course: courseLabel,
       courseId: quiz.courseId,
-      dueDate: new Date(quiz.dueDate),
-      description: quiz.description || '',
-      totalMarks: quiz.totalMarks,
-      questions: quiz.questions.map((q, index) => ({
+      dueDate: new Date(dueDate),
+      description: quiz.description || quiz.topic || '',
+      totalMarks,
+      questions: quiz.questions.map((q: any, index: number) => ({
         index,
         statement: q.question,
         options: q.options,
-        correctAnswer: q.answer,
+        correctAnswer: q.answer || q.correctAnswer,
         selectedAnswer: submission
           ? this.getSelectedAnswer(submission, index)
           : '',
